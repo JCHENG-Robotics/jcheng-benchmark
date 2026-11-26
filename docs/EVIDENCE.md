@@ -1,7 +1,7 @@
 # Evidence storage
 
-> Status: **v0.1.0** as of 2026-11-26. No benchmark report has been recorded;
-> the directory contains only this README.
+> Status: **v0.1.0 plus one migrated live snapshot** as of 2026-11-26. No
+> `benchmark-report` v1 result has been recorded.
 
 ## 1. Directory naming
 
@@ -69,9 +69,36 @@ Reports are append-only:
 
 ## 6. Current contents
 
-None. `v0.1.0` has no recorded dataset and no benchmark result. The synthetic
+- `host_benchmark_20261117_session4/` — the only evidence bundle; a read-only
+  host/DDS snapshot migrated on 2026-11-26 from the frozen
+  `jcheng-manipulation` baseline. It is not a harness report and no suite
+  threshold was evaluated.
+
+`v0.1.0` has no recorded dataset and no harness benchmark result. The synthetic
 fixture under `tests/fixtures/synthetic/` is a harness self-test and is not
 stored here as evidence.
+
+## 7. Migrated live-probe snapshots
+
+The quarantined probe under `tools/live/` writes a different, legacy-shaped
+bundle. It uses `evidence/host_benchmark_<YYYYMMDD>_<slug>/` with per-host
+files:
+
+```text
+evidence/host_benchmark_<YYYYMMDD>_<slug>/
+├── README.md            # scope, operator and provenance
+├── laptop_host.json/.txt
+├── ping_robot.txt
+├── robot_host.json/.txt
+├── robot_ros.json/.txt
+└── laptop_ros.json/.txt
+```
+
+These are raw snapshots, not `benchmark-report` v1 documents: there is no
+suite, no threshold and no dataset hash. They must not be counted as a suite
+pass and must not be mixed with `evidence/benchmark_<date>_<suite>/`. The
+runner refuses a non-empty directory, so a rerun creates a new bundle; record
+the operator and the read-only nature of the session in the bundle `README.md`.
 
 ## Related
 

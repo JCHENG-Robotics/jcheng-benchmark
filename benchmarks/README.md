@@ -47,8 +47,10 @@ The full field and failure rules are in
 6. Run with `--operator`, `--host` and a note; store the report under
    `evidence/benchmark_<YYYYMMDD>_<slug>/`.
 
-There is no benchmark result in this repository yet. Do not add a suite whose
-threshold is a guess.
+There is no suite result in this repository yet. The migrated 2026-11-17
+host/DDS snapshot under `evidence/host_benchmark_20261117_session4/` is a raw
+probe snapshot, not a suite result. Do not add a suite whose threshold is a
+guess.
 
 ## Related
 

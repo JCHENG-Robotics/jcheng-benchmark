@@ -2,9 +2,9 @@
 
 **简体中文** | [English](README.md)
 
-JCHENG Robotics 生态的离线、只读基准测试工具。它声明基准套件，读取由能力仓或系统仓导出的录制 JSONL 数据集，计算预先注册的指标并生成带来源标注的报告。它不加入 DDS、不打开设备、不读取传感器、不发送运动命令。
+JCHENG Robotics 生态的离线、只读基准测试工具。它声明基准套件，读取由能力仓或系统仓导出的录制 JSONL 数据集，计算预先注册的指标并生成带来源标注的报告。工具本身不加入 DDS、不打开设备、不读取传感器、不发送运动命令。唯一实时路径是 [`tools/live/`](tools/live/README.md) 下隔离的、仅由操作者运行的 host/DDS 探针；它不被安装、不被工具导入，产出原始快照而不是基准报告。
 
-> 状态：**实验性**，截至 2026-11-26。版本 0.1.0。仓库不附带任何基准数据集或结果；工具只用合成数据自测，因此不作出精度、时延或硬件方面的结论。
+> 状态：**实验性**，截至 2026-11-26。版本 0.1.0。仓库不附带任何基准数据集或套件结果；工具只用合成数据自测，因此不作出精度、时延或硬件方面的结论。仓库随探针迁移了一份 2026-11-17 的只读 host/DDS 快照，它不是套件结果。
 > 本文为英文主文档的中文对照；如有歧义，以英文版为准。
 
 ## 范围与边界
@@ -14,10 +14,10 @@ JCHENG Robotics 生态的离线、只读基准测试工具。它声明基准套�
 | 层 | BENCH — 不在运行时依赖图中（见 [`.github` `docs/repo-taxonomy.md`](https://github.com/JCHENG-Robotics/.github/blob/main/docs/repo-taxonomy.md)） |
 | 输入 | 套件 YAML 声明、录制 JSONL 数据集、命令行来源字段 |
 | 输出 | JSON 基准报告与 Markdown 渲染 |
-| 硬件访问 | `none`（`capability.yaml`） |
+| 硬件访问 | 工具为 `none`（`capability.yaml`）；隔离的 `tools/live/` 探针读取主机计数器并以只读方式订阅实时图 |
 | 拥有设备 | 无 |
 | 运动权限 | `none`；`control_path: none` |
-| 禁止 | 加入 DDS/ROS、打开设备、发送运动命令、修改测量数据、把合成结果表述为硬件结果 |
+| 禁止 | 工具加入 DDS/ROS、打开设备、发送运动命令、修改测量数据、把合成结果表述为硬件结果 |
 
 本仓库**不是**运行时能力。没有产品仓导入它，它不在 `ecosystem.lock.yaml` 中，也没有通往机器人的路径。它是测量工具：文件进，报告出。
 
@@ -54,18 +54,32 @@ jcheng-benchmark/
 ├── docs/
 │   ├── ARCHITECTURE.md      # 信任边界与组件
 │   ├── BENCHMARK_PROTOCOL.md# 预注册、层级、格式、结果规则
-│   └── EVIDENCE.md          # 报告存储与不可变性
-├── evidence/                # 处理真实数据集后的报告
+│   ├── EVIDENCE.md          # 报告存储与不可变性
+│   └── HOST_BENCHMARK.md    # 迁移的 host/DDS 探针与 2026-11-17 结果
+├── evidence/                # 报告，以及迁移的 2026-11-17 快照
 ├── src/jcheng_benchmark/    # 无 ROS 依赖的 runner、模型、统计、CLI
 ├── scripts/check_repo_gate.sh
-└── tests/                   # 单元、CLI、报告与边界测试
+├── tests/                   # 单元、CLI、报告与边界测试
+└── tools/live/              # 隔离的只读 host/DDS 探针（不打包）
 ```
+
+## 隔离的实时探针
+
+`tools/live/` 保存 2026-11-26 从冻结的 `jcheng-manipulation` v1.0.0 基线迁移来的只读 host/DDS 探针及其 runner。它是操作者工具，边界独立：
+
+- 不被 `jcheng_benchmark` 导入，setuptools 不安装它；
+- `host` 模式只读主机计数器；`ros` 模式只读订阅，不发布、不调用服务、不打开设备；
+- CI 只运行其 host-only 路径，并跳过机器人与 ROS 步骤；
+- 它写出逐主机 JSON 快照，而不是 `benchmark-report` v1 文档，也不评估任何套件门限；
+- `tests/test_live_probe_boundary.py` 拒绝发布者、设备、容器重启和运动相关标记，并检查 `src/` 从未引用它。
+
+安全与用法见 [`tools/live/README.md`](tools/live/README.md)，测量结果见 [`docs/HOST_BENCHMARK.md`](docs/HOST_BENCHMARK.md)。
 
 ## 依赖
 
 - Python 3.10 或更新版本（本机 3.12；CI 覆盖 3.10 与 3.12）。
 - 运行时依赖 `PyYAML` 6.x；测试依赖 `pytest` 7.4+。
-- 不需要 ROS 发行版、DDS 中间件、相机、串口、CAN 或 GPIO 设备，也不需要机器人访问权限。
+- 工具不需要 ROS 发行版、DDS 中间件、相机、串口、CAN 或 GPIO 设备，也不需要机器人访问权限。隔离探针在操作者运行时可以使用 ROS 2 环境和 SSH 访问机器人；工具与 CI 从不依赖它。
 
 ## 快速开始
 
@@ -103,6 +117,7 @@ bash scripts/check_repo_gate.sh
 | 报告记录层级、数据来源、操作者、主机和两个 SHA-256 | 部分验证（合成） | `tests/test_reports.py`、gate 中的合成自测 |
 | 已运行过录制数据回放套件 | 未验证 | 仓内没有数据集；M2 尚未开始 |
 | 已运行过硬件基准 | 未验证 | 设计上无硬件访问 |
+| 已测量只读 host/DDS 快照 | 已验证（硬件，只读；2026-11-17） | [`evidence/host_benchmark_20261117_session4/`](evidence/host_benchmark_20261117_session4/README.md)；迁移所得，未在本仓重跑 |
 
 完整报告：[ACCEPTANCE.md](ACCEPTANCE.md)。状态词汇遵循组织[文档标准](https://github.com/JCHENG-Robotics/.github/blob/main/docs/documentation-standard.md)。
 
@@ -126,6 +141,7 @@ bash scripts/check_repo_gate.sh
 - [`jcheng-mobile`](https://github.com/JCHENG-Robotics/jcheng-mobile) — 激光里程计、SLAM 与 Nav2 录制的来源。
 - [`jcheng-system`](https://github.com/JCHENG-Robotics/jcheng-system) — Mock 端到端与安全路径录制的来源。
 - [`jcheng-ops`](https://github.com/JCHENG-Robotics/jcheng-ops) — 运维；不是基准消费者。
+- [`jcheng-manipulation`](https://github.com/JerichoCheng/jcheng-manipulation) — 冻结的 v1.0.0 基线，提供了隔离的实时探针及其 2026-11-17 快照。
 - [`.github`](https://github.com/JCHENG-Robotics/.github) — 生态路线图、变更日志、验收与分类。
 
 ## 许可

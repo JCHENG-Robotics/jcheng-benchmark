@@ -6,6 +6,20 @@ All notable changes to this project are documented here. Format based on
 
 ## [Unreleased]
 
+### Added
+
+- Migrated the read-only host/DDS probe from the frozen `jcheng-manipulation`
+  v1.0.0 baseline (`a08b8b6`): `tools/live/host_benchmark.py`,
+  `tools/live/run_benchmark.sh` and their tests. The probe is quarantined: not
+  packaged, not imported by `jcheng_benchmark`, and statically checked by
+  `tests/test_live_probe_boundary.py`.
+- Migrated the 2026-11-17 Session 4 host/DDS snapshots to
+  `evidence/host_benchmark_20261117_session4/` (byte-for-byte copy) and the
+  report to `docs/HOST_BENCHMARK.md`.
+- `scripts/check_repo_gate.sh` now checks the probe's shell/Python syntax, its
+  confinement and its documentation; `pytest` also collects
+  `tools/live/tests`.
+
 ## [0.1.0] — 2026-11-26
 
 First version. No tag was created before the first CI run; the release is

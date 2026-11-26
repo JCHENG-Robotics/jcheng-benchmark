@@ -1,7 +1,9 @@
 # Architecture
 
 > Status: **v0.1.0** as of 2026-11-26. The harness is an offline
-> file-in/report-out tool with no runtime dependency and no hardware path.
+> file-in/report-out tool with no runtime dependency and no hardware path. A
+> quarantined, operator-only live probe under `tools/live/` is described in
+> §9; it is not part of the harness.
 
 ## 1. Position in the ecosystem
 
@@ -49,11 +51,13 @@ session authorization.
 | `src/jcheng_benchmark/runner.py` | Strict JSONL reader, metric computation, threshold evaluation, report mapping | Yes |
 | `src/jcheng_benchmark/report.py` | JSON and Markdown rendering | Yes |
 | `src/jcheng_benchmark/cli.py` | `list`, `validate`, `run` subcommands and exit codes | Yes |
+| `tools/live/` | Quarantined read-only host/DDS probe and runner migrated from the frozen baseline; not imported and not packaged | No (`ros` mode only) |
 
 The package imports only the Python standard library and PyYAML. It contains no
 ROS client library, no serial or device code, no subprocess call and no network
 client. `tests/test_no_hardware.py` enforces the boundary over `src/`,
-`scripts/` and `benchmarks/`.
+`scripts/` and `benchmarks/`. The quarantined probe is outside the package and
+is governed by `tests/test_live_probe_boundary.py` instead.
 
 ## 4. Execution flow
 
@@ -109,10 +113,13 @@ limitation that says the result is not a hardware or recorded-data result.
 - **New aggregate.** Define it precisely (interpolation matters), implement it,
   and test it against a known vector. Do not add an aggregate only in a report
   script.
-- **Live acquisition.** This is deliberately out of scope for v0.1. It would be
-  a separate runtime role with a read-only ROS subscription, a new capability
-  manifest and its own authorization rules. It must not turn this repository
-  into a runtime dependency of a capability.
+- **Live acquisition.** The harness has no live adapter in v0.1. A quarantined,
+  operator-only probe under `tools/live/` (migrated 2026-11-26 from the frozen
+  `jcheng-manipulation` baseline) reads host counters and subscribes read-only;
+  it produces raw per-host snapshots, not datasets or reports, and is neither
+  imported nor packaged. A dataset-producing adapter would still be a separate
+  runtime role with its own capability manifest and authorization rules (M4),
+  and must not turn this repository into a runtime dependency of a capability.
 - **Report contract promotion.** If a second repository consumes the report
   format, propose it to `jcheng-interfaces` under the contract change process.
   Until then the format is repository-local v1.
@@ -130,10 +137,35 @@ become part of the control path. Keeping it offline means:
 The cost is that a human must export the dataset. That export is an explicit,
 reviewable step, and its provenance is exactly what the report records.
 
+## 9. Quarantined live probe
+
+`tools/live/` contains the read-only host/DDS probe and its one-command runner,
+copied on 2026-11-26 from the frozen `jcheng-manipulation` v1.0.0 baseline. It
+exists because benchmark ownership moved here, not because the harness gained a
+live path.
+
+| Property | Probe |
+|---|---|
+| Packaging | Not packaged (`setuptools` only finds `src/`) |
+| Imports | Standalone; never imported by `jcheng_benchmark` |
+| Write path | None: no publisher, service call, parameter write or lease |
+| Device path | None: host counters are read from `/proc` and `/sys`; no camera, serial, CAN, GPIO or servo is opened |
+| Robot path | Operator-run SSH to the Pi and `docker exec` inside the already-running vendor container; the runner never restarts a container |
+| Output | Per-host JSON and text snapshots under `evidence/host_benchmark_<date>_<slug>/` |
+| Result semantics | Not a `benchmark-report` v1 document; no suite, threshold or dataset hash |
+| CI | Only the host-only path runs, with the robot and ROS steps skipped |
+| Static guard | `tests/test_live_probe_boundary.py` rejects publisher, device, container-restart and motion tokens, and checks that `src/` never references the probe |
+
+The probe's measurements and limitations are in
+[HOST_BENCHMARK.md](HOST_BENCHMARK.md). It does not feed a suite; M4 in the
+roadmap remains the dataset-producing acquisition adapter.
+
 ## Related
 
 - [BENCHMARK_PROTOCOL.md](BENCHMARK_PROTOCOL.md) — pre-registration, formats and result rules.
 - [EVIDENCE.md](EVIDENCE.md) — report storage and immutability.
+- [HOST_BENCHMARK.md](HOST_BENCHMARK.md) — migrated host/DDS probe and results.
+- [`tools/live/README.md`](../tools/live/README.md) — probe scope and safety.
 - [`capability.yaml`](../capability.yaml) — admission manifest.
 - [`jcheng-interfaces`](https://github.com/JCHENG-Robotics/jcheng-interfaces) — contract source; no contract is consumed here.
 - [`.github`](https://github.com/JCHENG-Robotics/.github) — ecosystem taxonomy and documentation standard.
