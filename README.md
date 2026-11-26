@@ -1,5 +1,7 @@
 # jcheng-benchmark
 
+**English** | [简体中文](README.zh-CN.md)
+
 Offline, read-only benchmark harness for the JCHENG Robotics ecosystem. It
 declares benchmark suites, consumes recorded JSONL datasets exported by the
 capability or system repositories, computes pre-registered metrics and writes a
@@ -9,8 +11,7 @@ or command motion.
 > Status: **Experimental** as of 2026-11-26. Version 0.1.0. No benchmark
 > dataset or result ships with the repository; the harness is exercised only by
 > synthetic self-tests, so no accuracy, latency or hardware claim is made.
-> English canonical; see [README.zh-CN.md](README.zh-CN.md) for the Chinese
-> translation.
+> English canonical; the Chinese README is a translation.
 
 ## Scope and boundary
 
