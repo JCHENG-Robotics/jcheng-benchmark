@@ -1,0 +1,6 @@
+# Two-reviewer model. Both maintainers can approve.
+* @JerichoCheng @JerichoSwaine
+
+/scripts/ @JerichoCheng @JerichoSwaine
+/benchmarks/ @JerichoCheng @JerichoSwaine
+/.github/ @JerichoCheng @JerichoSwaine

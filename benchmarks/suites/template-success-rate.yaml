@@ -1,0 +1,17 @@
+schema_version: 1
+suite: template-success-rate
+title: Success rate template
+level: L3
+data_source: mock
+description: >-
+  Template for a mock end-to-end suite that records a boolean outcome per
+  sample. The sample field defaults to success when source is omitted.
+min_samples: 20
+metrics:
+  - id: success
+    kind: success_rate
+    source: success
+    unit: ratio
+thresholds: []
+limitations:
+  - Template only. A mock result never counts as hardware validation.

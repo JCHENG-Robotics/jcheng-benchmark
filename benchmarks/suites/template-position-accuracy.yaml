@@ -1,0 +1,20 @@
+schema_version: 1
+suite: template-position-accuracy
+title: Position accuracy template
+level: L4
+data_source: recorded
+description: >-
+  Template for a replay suite over a recorded position dataset. No dataset
+  ships with the repository. Register the threshold and its source before
+  collecting data, then export one JSON line per sample.
+min_samples: 30
+metrics:
+  - id: position_error
+    kind: position_error
+    unit: mm
+thresholds: []
+limitations:
+  - Template only. A threshold must be registered before the dataset is
+    collected and must cite its source.
+  - The sample fields measured_m and reference_m are in metres; the metric is
+    reported in millimetres.

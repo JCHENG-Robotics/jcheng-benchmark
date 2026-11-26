@@ -1,0 +1,19 @@
+schema_version: 1
+suite: template-scalar-latency
+title: Scalar latency template
+level: L4
+data_source: recorded
+description: >-
+  Template for a replay suite over a recorded latency dataset. The source field
+  must be a finite number in milliseconds on every sample.
+min_samples: 30
+metrics:
+  - id: latency_ms
+    kind: scalar
+    source: latency_ms
+    aggregate: p95
+    unit: ms
+thresholds: []
+limitations:
+  - Template only. Latency depends on host, load and model; record the
+    environment with the dataset.

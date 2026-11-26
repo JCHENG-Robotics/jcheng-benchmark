@@ -1,0 +1,71 @@
+# Capability manifest for the organization's admission check.
+# jcheng-benchmark is a BENCH-layer repository: it runs offline over recorded
+# datasets, is not imported by any runtime repository and has no hardware path
+# (JCHENG-Robotics/.github docs/repo-taxonomy.md, layer BENCH).
+name: jcheng-benchmark
+version: 0.1.0
+layer: bench
+status: experimental
+
+runtime_roles:
+  offline-benchmark:
+    host: operator workstation (Linux/macOS), Python 3.10+
+    responsibilities:
+      - load a pre-registered suite and a recorded JSONL dataset
+      - compute the declared metrics and evaluate the declared thresholds
+      - emit JSON and Markdown reports with dataset and suite hashes
+      - abort on malformed rows instead of dropping them
+    forbidden:
+      - joining a ROS graph or any DDS domain
+      - opening cameras, serial, CAN, GPIO or servo devices
+      - sending motion commands or acquiring a control lease
+      - generating, editing or back-filling measurement data
+      - publishing a synthetic or mock result as a hardware result
+
+hardware_access:
+  kind: none
+  detail: >-
+    The harness reads files written by other repositories. It has no ROS client
+    library, no serial/device code and no network path. Live acquisition is
+    explicitly out of scope for v0.1.
+
+motion_authority: none
+control_path: none
+fail_closed: true
+
+topics:
+  subscribes: []
+  publishes: []
+
+contracts:
+  status: not_applicable
+  note: >-
+    The suite, sample and report formats are repository-local v1 documents.
+    No cross-repository contract is defined or consumed. If a second repository
+    consumes the report format, it must be proposed to jcheng-interfaces under
+    the contract change process before it is treated as stable.
+
+safety:
+  - The harness has no hardware, DDS or motion path.
+  - Malformed samples abort the run; rows are never silently dropped.
+  - Synthetic and mock data are labelled in the report and never satisfy a
+    hardware claim.
+  - Thresholds are declared before data collection; changing one requires a
+    new suite revision.
+  - A failed threshold stays failed; a rerun creates a new report, it does not
+    overwrite the old one.
+  - A report is not an acceptance report and does not replace the source
+    repository's ACCEPTANCE.md.
+  - A benchmark pass is not a safety certification.
+
+verification:
+  repo_gate: >-
+    scripts/check_repo_gate.sh (local 2026-11-26); CI workflow
+    .github/workflows/ci.yml
+  tests: >-
+    pytest unit, CLI, report and no-hardware boundary tests (tests/); the
+    synthetic self-test exercises pass, fail and inconclusive paths
+  not_verified:
+    - no recorded dataset is committed, so no accuracy or latency claim exists
+    - no hardware data has been processed
+    - no live acquisition adapter exists

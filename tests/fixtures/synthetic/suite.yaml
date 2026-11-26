@@ -1,0 +1,37 @@
+schema_version: 1
+suite: synthetic-self-test
+title: Synthetic self-test for the benchmark harness
+level: L2
+data_source: synthetic
+description: >-
+  Deterministic samples used only to exercise the suite, metric and report
+  paths. This is not a perception, latency or hardware result.
+min_samples: 8
+metrics:
+  - id: position_error
+    kind: position_error
+    unit: mm
+  - id: latency_ms
+    kind: scalar
+    source: latency_ms
+    aggregate: p95
+    unit: ms
+  - id: success
+    kind: success_rate
+    source: success
+    unit: ratio
+thresholds:
+  - metric: position_error
+    aggregate: p95
+    op: "<="
+    value: 10.0
+  - metric: latency_ms
+    aggregate: p95
+    op: "<="
+    value: 100.0
+  - metric: success
+    aggregate: rate
+    op: ">="
+    value: 0.75
+limitations:
+  - Synthetic samples; this is a harness self-test, not a benchmark result.

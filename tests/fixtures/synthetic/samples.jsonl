@@ -1,0 +1,8 @@
+{"sample_id": "sim-001", "trial": "pose-1", "measured_m": [0.0, 0.0, 0.0], "reference_m": [0.0, 0.0, 0.0], "latency_ms": 10.0, "success": true}
+{"sample_id": "sim-002", "trial": "pose-1", "measured_m": [0.001, 0.0, 0.0], "reference_m": [0.0, 0.0, 0.0], "latency_ms": 12.0, "success": true}
+{"sample_id": "sim-003", "trial": "pose-1", "measured_m": [0.002, 0.0, 0.0], "reference_m": [0.0, 0.0, 0.0], "latency_ms": 14.0, "success": true}
+{"sample_id": "sim-004", "trial": "pose-1", "measured_m": [0.003, 0.0, 0.0], "reference_m": [0.0, 0.0, 0.0], "latency_ms": 16.0, "success": true}
+{"sample_id": "sim-005", "trial": "pose-2", "measured_m": [0.004, 0.0, 0.0], "reference_m": [0.0, 0.0, 0.0], "latency_ms": 18.0, "success": true}
+{"sample_id": "sim-006", "trial": "pose-2", "measured_m": [0.005, 0.0, 0.0], "reference_m": [0.0, 0.0, 0.0], "latency_ms": 20.0, "success": true}
+{"sample_id": "sim-007", "trial": "pose-2", "measured_m": [0.006, 0.0, 0.0], "reference_m": [0.0, 0.0, 0.0], "latency_ms": 22.0, "success": true}
+{"sample_id": "sim-008", "trial": "pose-2", "measured_m": [0.009, 0.0, 0.0], "reference_m": [0.0, 0.0, 0.0], "latency_ms": 30.0, "success": false}
