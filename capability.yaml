@@ -25,9 +25,12 @@ runtime_roles:
 hardware_access:
   kind: none
   detail: >-
-    The harness reads files written by other repositories. It has no ROS client
-    library, no serial/device code and no network path. Live acquisition is
-    explicitly out of scope for v0.1.
+    The harness reads files written by other repositories and has no ROS client
+    library, no serial/device code and no network path. Live acquisition is out
+    of scope for the harness. A quarantined, operator-only read-only probe
+    migrated from the jcheng-manipulation baseline lives under tools/live/; it
+    is not imported, not installed, opens no device, produces no benchmark
+    report and never publishes or commands motion.
 
 motion_authority: none
 control_path: none
@@ -67,5 +70,6 @@ verification:
     synthetic self-test exercises pass, fail and inconclusive paths
   not_verified:
     - no recorded dataset is committed, so no accuracy or latency claim exists
-    - no hardware data has been processed
-    - no live acquisition adapter exists
+    - no suite has been run against hardware data
+    - the quarantined probe produces snapshots, not datasets; it is not an acquisition adapter
+    - the migrated 2026-11-17 snapshot has not been re-run in this repository

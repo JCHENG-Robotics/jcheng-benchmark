@@ -5,13 +5,18 @@
 Offline, read-only benchmark harness for the JCHENG Robotics ecosystem. It
 declares benchmark suites, consumes recorded JSONL datasets exported by the
 capability or system repositories, computes pre-registered metrics and writes a
-provenance-labelled report. It does not join DDS, open a device, read a sensor
-or command motion.
+provenance-labelled report. The harness itself does not join DDS, open a
+device, read a sensor or command motion. A quarantined, operator-only host/DDS
+probe under [`tools/live/`](tools/live/README.md) is the only live path; it is
+not installed, not imported by the harness and produces raw snapshots rather
+than benchmark reports.
 
 > Status: **Experimental** as of 2026-11-26. Version 0.1.0. No benchmark
-> dataset or result ships with the repository; the harness is exercised only by
-> synthetic self-tests, so no accuracy, latency or hardware claim is made.
-> English canonical; the Chinese README is a translation.
+> dataset or suite result ships with the repository; the harness is exercised
+> only by synthetic self-tests, so no accuracy, latency or hardware claim is
+> made. One read-only host/DDS snapshot (2026-11-17) was migrated with its
+> probe from the frozen `jcheng-manipulation` baseline; it is not a suite
+> result. English canonical; the Chinese README is a translation.
 
 ## Scope and boundary
 
@@ -20,10 +25,10 @@ or command motion.
 | Layer | BENCH — outside the runtime dependency graph (see [`.github` `docs/repo-taxonomy.md`](https://github.com/JCHENG-Robotics/.github/blob/main/docs/repo-taxonomy.md)) |
 | Inputs | A suite YAML declaration, a recorded JSONL dataset, CLI provenance fields |
 | Outputs | A JSON benchmark report and a Markdown rendering |
-| Hardware access | `none` (`capability.yaml`) |
+| Hardware access | `none` (`capability.yaml`) for the harness; the quarantined `tools/live/` probe reads host counters and subscribes read-only to a live graph |
 | Owned devices | None |
 | Motion authority | `none`; `control_path: none` |
-| Forbidden | Joining DDS/ROS, opening devices, sending motion commands, editing measurement data, presenting synthetic results as hardware results |
+| Forbidden | Joining DDS/ROS from the harness, opening devices, sending motion commands, editing measurement data, presenting synthetic results as hardware results |
 
 This repository is **not** a runtime capability. No product repository imports
 it, it is not in `ecosystem.lock.yaml`, and it has no path to the robot. It is a
@@ -71,19 +76,41 @@ jcheng-benchmark/
 ├── docs/
 │   ├── ARCHITECTURE.md      # trust boundary and components
 │   ├── BENCHMARK_PROTOCOL.md# pre-registration, levels, formats, result rules
-│   └── EVIDENCE.md          # report storage and immutability
-├── evidence/                # reports, once real datasets are processed
+│   ├── EVIDENCE.md          # report storage and immutability
+│   └── HOST_BENCHMARK.md    # migrated host/DDS probe and 2026-11-17 results
+├── evidence/                # reports and the migrated 2026-11-17 snapshots
 ├── src/jcheng_benchmark/    # ROS-free runner, model, statistics, CLI
 ├── scripts/check_repo_gate.sh
-└── tests/                   # unit, CLI, report and boundary tests
+├── tests/                   # unit, CLI, report and boundary tests
+└── tools/live/              # quarantined read-only host/DDS probe (not packaged)
 ```
+
+## Live probe (quarantined)
+
+`tools/live/` holds the read-only host/DDS probe and runner migrated on
+2026-11-26 from the frozen `jcheng-manipulation` v1.0.0 baseline. It is an
+operator tool with its own boundary:
+
+- it is not imported by `jcheng_benchmark` and setuptools does not install it;
+- its `host` mode reads host counters only; its `ros` mode subscribes read-only,
+  never publishes, never calls a service and never opens a device;
+- CI runs only its host-only path with the robot and ROS steps skipped;
+- it writes raw per-host JSON snapshots, not a `benchmark-report` v1 document,
+  and it evaluates no suite threshold;
+- `tests/test_live_probe_boundary.py` rejects publisher, device, container
+  restart and motion tokens, and checks that `src/` never references it.
+
+See [`tools/live/README.md`](tools/live/README.md) for safety and usage, and
+[`docs/HOST_BENCHMARK.md`](docs/HOST_BENCHMARK.md) for the measured results.
 
 ## Requirements
 
 - Python 3.10 or newer (the host runs 3.12; CI covers 3.10 and 3.12).
 - `PyYAML` 6.x at runtime; `pytest` 7.4+ for tests.
 - No ROS distribution, no DDS middleware, no camera, serial, CAN or GPIO
-  device, and no robot access.
+  device, and no robot access for the harness. The quarantined probe may use a
+  ROS 2 environment and SSH to a robot when an operator runs it; it is never
+  required for the harness or CI.
 
 ## Quick start
 
@@ -124,6 +151,7 @@ means "the declared gate passed for the declared data source"; it does not mean
 | A report records level, data source, operator, host and both SHA-256 hashes | Partially verified (synthetic) | `tests/test_reports.py`, synthetic self-test in the gate |
 | A recorded-data replay suite has been run | Unverified | No dataset ships; M2 is not started |
 | A hardware benchmark has been run | Unverified | No hardware access by design |
+| Host/DDS snapshot measured read-only | Verified (hardware, read-only; 2026-11-17) | [`evidence/host_benchmark_20261117_session4/`](evidence/host_benchmark_20261117_session4/README.md); migrated, not re-run here |
 
 Full report: [ACCEPTANCE.md](ACCEPTANCE.md). The status vocabulary follows the
 organization [documentation standard](https://github.com/JCHENG-Robotics/.github/blob/main/docs/documentation-standard.md).
@@ -149,6 +177,7 @@ than `hardware`.
 - [`jcheng-mobile`](https://github.com/JCHENG-Robotics/jcheng-mobile) — source of laser-odometry, SLAM and Nav2 recordings.
 - [`jcheng-system`](https://github.com/JCHENG-Robotics/jcheng-system) — source of mock end-to-end and safety-path recordings.
 - [`jcheng-ops`](https://github.com/JCHENG-Robotics/jcheng-ops) — operations; not a benchmark consumer.
+- [`jcheng-manipulation`](https://github.com/JerichoCheng/jcheng-manipulation) — frozen v1.0.0 baseline that supplied the quarantined live probe and its 2026-11-17 snapshots.
 - [`.github`](https://github.com/JCHENG-Robotics/.github) — ecosystem roadmap, changelog, acceptance and taxonomy.
 
 ## License

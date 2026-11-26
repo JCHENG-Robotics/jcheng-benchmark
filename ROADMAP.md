@@ -1,7 +1,8 @@
 # jcheng-benchmark roadmap
 
 > Status: **v0.1.0** as of 2026-11-26. The offline harness and its protocol are
-> in place; no recorded or hardware benchmark has been run.
+> in place; no suite has run. A 2026-11-17 read-only host/DDS snapshot was
+> migrated with its quarantined probe from the frozen baseline.
 
 ## Current state
 
@@ -11,6 +12,7 @@
 | Offline suite, metric and report runner | Complete (2026-11-26) | `src/jcheng_benchmark/`; `tests/` |
 | Benchmark protocol v1 | Complete (2026-11-26) | `docs/BENCHMARK_PROTOCOL.md` |
 | Synthetic self-test of the harness | Complete (2026-11-26, synthetic only) | `tests/fixtures/synthetic/`; gate |
+| Baseline host/DDS live probe | Complete (migrated 2026-11-26; measured 2026-11-17) | `tools/live/`; `evidence/host_benchmark_20261117_session4/` |
 | Recorded-data replay benchmark | Not started | No dataset ships |
 | Hardware benchmark | Not started | No hardware access by design |
 | Cross-repository report contract | Not started | Repo-local v1 only |
@@ -23,7 +25,7 @@
 | M1 | Benchmark protocol v1 | Complete (2026-11-26) | Suite/sample/report formats documented and enforced by the loader and tests | `docs/BENCHMARK_PROTOCOL.md`; `src/jcheng_benchmark/model.py`; `tests/` |
 | M2 | First recorded replay suite | Not started | A recorded dataset is exported, the threshold is pre-registered, and a report is stored under `evidence/` | — |
 | M3 | Suite catalogue | Planned | Latency, cross-view, mobile and DDS suites each have a dataset source, a pre-registered threshold and a produced report | — |
-| M4 | Read-only live acquisition adapter | Planned | A separate capability manifest declares a read-only ROS role; explicit operator authorization is recorded; no motion command | — |
+| M4 | Dataset-producing read-only acquisition adapter | Planned | A separate capability manifest declares a read-only ROS role, exports a JSONL dataset with provenance and records operator authorization; no motion command. The migrated probe in `tools/live/` is a snapshot tool, not this adapter | — |
 | M5 | Report schema promotion to `jcheng-interfaces` | Planned | A second repository consumes the format and the contract change is accepted | — |
 
 ## Next
@@ -40,7 +42,9 @@
 ## Out of scope
 
 - Running as a runtime capability or being imported by another repository.
-- Joining any DDS domain, subscribing to ROS topics or publishing commands.
+- The offline harness joining any DDS domain, subscribing to ROS topics or
+  publishing commands. The quarantined `tools/live/` probe subscribes read-only
+  and never publishes.
 - Opening cameras, serial, CAN, GPIO, servo or LiDAR devices.
 - Sending motion commands, acquiring a lease or replacing the e-stop.
 - Certifying safety, accuracy or reliability; a benchmark report is not an
@@ -53,7 +57,8 @@
 - `jcheng-interfaces` v0.1.0 is the ecosystem contract source, but this
   repository **consumes no contract** and defines none outside itself. A future
   report contract must be promoted there, not here.
-- Python 3.10+ and PyYAML 6.x. No ROS distribution is required.
+- Python 3.10+ and PyYAML 6.x. No ROS distribution is required for the harness;
+  the quarantined probe is the only component that uses one.
 - Recorded datasets remain outside the repository; the report records their
   SHA-256.
 - Any future hardware capture needs separate, explicit operator authorization

@@ -17,7 +17,9 @@ The protocol makes a benchmark result reproducible and comparable:
 
 It does **not** verify how a recording was captured, certify safety, or replace
 the source repository's acceptance report. A benchmark pass is a project gate,
-not a safety certification.
+not a safety certification. It also does not cover the quarantined live
+host/DDS probe in `tools/live/`: that probe writes raw snapshots, not protocol
+reports.
 
 ## 2. Pre-registration
 

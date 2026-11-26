@@ -1,9 +1,10 @@
 # Evidence
 
-> Status: **empty** as of 2026-11-26. No benchmark report has been recorded.
+> Status: **one migrated live-probe snapshot bundle** as of 2026-11-26. No
+> `benchmark-report` v1 result has been recorded.
 
-`v0.1.0` ships no recorded dataset and no benchmark result. This directory will
-hold one subdirectory per run:
+`v0.1.0` ships no recorded dataset and no harness benchmark result. Harness runs
+go in one subdirectory per run:
 
 ```text
 evidence/benchmark_<YYYYMMDD>_<suite-slug>/
@@ -20,6 +21,16 @@ including the hardware-authorization record, are in
 
 The synthetic fixture under `tests/fixtures/synthetic/` is a harness self-test,
 not evidence, and is not stored here.
+
+## Migrated live-probe evidence
+
+`host_benchmark_20261117_session4/` is the 2026-11-17 host/DDS snapshot bundle,
+copied byte-for-byte from the frozen `jcheng-manipulation` v1.0.0 baseline on
+2026-11-26. It has a different shape from a harness report (per-host JSON and
+text files, no suite, no threshold, no dataset hash) and must never be counted
+as a `benchmark-report` v1 result. See its
+[`README.md`](host_benchmark_20261117_session4/README.md) and
+[`docs/HOST_BENCHMARK.md`](../docs/HOST_BENCHMARK.md).
 
 ## Related
 

@@ -45,6 +45,12 @@ src/jcheng_benchmark/runner.py
 src/jcheng_benchmark/stats.py
 tests/fixtures/synthetic/suite.yaml
 tests/fixtures/synthetic/samples.jsonl
+tools/live/README.md
+tools/live/host_benchmark.py
+tools/live/run_benchmark.sh
+tools/live/tests/test_host_benchmark.py
+tools/live/tests/test_run_benchmark.py
+evidence/host_benchmark_20261117_session4/README.md
 EOF
 
 step "no LICENSE before the review closes"
@@ -53,13 +59,16 @@ step "no LICENSE before the review closes"
 step "shell syntax"
 while IFS= read -r script; do
     bash -n "$script" || fail "bash -n $script"
-done < <(find scripts -name '*.sh' -type f | sort)
+done < <(find scripts tools -name '*.sh' -type f | sort)
 
 step "python syntax"
-python3 -m compileall -q src tests
+python3 -m compileall -q src tests tools/live
 
 step "no hardware or DDS access"
 python3 -m pytest -q tests/test_no_hardware.py
+
+step "live probe confinement"
+python3 -m pytest -q tests/test_live_probe_boundary.py
 
 step "secret scan"
 if grep -rInE \
@@ -124,6 +133,8 @@ documents = [
     *sorted(Path("docs").glob("*.md")),
     Path("benchmarks/README.md"),
     Path("evidence/README.md"),
+    Path("tools/live/README.md"),
+    Path("evidence/host_benchmark_20261117_session4/README.md"),
 ]
 
 problems = []
