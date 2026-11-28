@@ -6,6 +6,11 @@ All notable changes to this project are documented here. Format based on
 
 ## [Unreleased]
 
+### Changed
+
+- CI targets Python 3.12 only, matching the Jazzy/Ubuntu 24.04 default
+  toolchain.
+
 ### Added
 
 - Migrated the read-only host/DDS probe from the frozen `jcheng-manipulation`
